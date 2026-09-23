@@ -171,6 +171,12 @@ export const demoVehicle: Vehicle = {
       ],
       camera: { position: [2.6, 1.15, 4.3], target: [0.45, 0.55, 1.55] },
       callout: { anchor: [0.66, 0.66, 1.87], elbow: [1.05, 1.15, 2.2], label: [1.6, 1.15, 2.2] },
+      toggle: {
+        label: "Status",
+        onLabel: "On",
+        offLabel: "Off",
+        emissive: { color: "#fff4e0", intensity: 6 },
+      },
     },
     {
       id: "grille",

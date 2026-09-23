@@ -17,6 +17,7 @@ interface CarModelProps {
   /** Features whose `meshNames` make GLB meshes directly clickable. */
   features: VehicleFeature[];
   selectedFeatureId: string | null;
+  onFeatureIds: readonly string[];
   hoveredFeatureRef: RefObject<string | null>;
   /** Called once the model is mounted, with its world-space bounds (used for camera framing). */
   onReady?: (bounds: Box3) => void;
@@ -32,6 +33,7 @@ export function CarModel({
   paint,
   features,
   selectedFeatureId,
+  onFeatureIds,
   hoveredFeatureRef,
   onReady,
 }: CarModelProps) {
@@ -89,7 +91,9 @@ export function CarModel({
       <primitive object={prepared.root} />
       <CarFeatureHighlight
         featureMaterials={prepared.featureMaterials}
+        features={features}
         selectedFeatureId={selectedFeatureId}
+        onFeatureIds={onFeatureIds}
         hoveredFeatureRef={hoveredFeatureRef}
       />
     </group>

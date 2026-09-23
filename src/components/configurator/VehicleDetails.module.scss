@@ -1,0 +1,197 @@
+$ink: #121314;
+$ink-soft: #4a4d52;
+$ink-muted: #8a8d92;
+$line: #d9d9d6;
+$ease: cubic-bezier(0.22, 1, 0.36, 1);
+$mobile: 639px;
+
+// Revealed after the first meaningful interaction. Rendered conditionally, so
+// there is no empty space before; this only softens its arrival.
+.root {
+  padding: 64px 0 96px;
+  border-top: 1px solid $line;
+  background: #f5f5f3;
+  animation: details-in 600ms $ease both;
+  scroll-margin-top: 16px;
+
+  @media (max-width: $mobile) {
+    padding: 44px 0 72px;
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 48px;
+
+  @media (max-width: 1023px) {
+    padding: 0 32px;
+  }
+
+  @media (max-width: $mobile) {
+    padding: 0 16px;
+  }
+}
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 64px;
+  align-items: start;
+
+  @media (max-width: 1023px) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.overline {
+  display: block;
+  margin: 0;
+  color: $ink-muted;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.selection {
+  max-width: 620px;
+  animation: selection-in 420ms $ease both;
+}
+
+.title {
+  margin: 12px 0 0;
+  color: $ink;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  margin: 16px 0 0;
+  color: $ink-soft;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 20px;
+}
+
+.statusLabel {
+  color: $ink-muted;
+  font-size: 13px;
+}
+
+.statusValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: $ink;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  &::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba($ink, 0.2);
+    transition: background-color 300ms $ease, box-shadow 300ms $ease;
+  }
+
+  &[data-on="true"]::before {
+    background: #e2a93b;
+    box-shadow: 0 0 0 3px rgba(#e2a93b, 0.2);
+  }
+}
+
+.toggle {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid rgba($ink, 0.2);
+  border-radius: 999px;
+  background: transparent;
+  color: $ink;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 250ms $ease;
+
+  &:hover {
+    border-color: $ink;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ink;
+    outline-offset: 2px;
+  }
+}
+
+.summary {
+  padding-top: 4px;
+}
+
+.summaryList {
+  margin: 14px 0 0;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid $line;
+  }
+
+  dt {
+    color: $ink-soft;
+    font-size: 14px;
+  }
+
+  dd {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: $ink;
+    font-size: 14px;
+    text-align: right;
+  }
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba($ink, 0.15);
+}
+
+@keyframes details-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes selection-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .selection {
+    animation: none;
+  }
+}

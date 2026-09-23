@@ -1,0 +1,151 @@
+$ink: #121314;
+$ink-soft: #4a4d52;
+$ink-muted: #8a8d92;
+$line: #d9d9d6;
+$ease: cubic-bezier(0.22, 1, 0.36, 1);
+$mobile: 639px;
+
+.root {
+  padding-top: 56px;
+}
+
+.heading {
+  margin: 0 0 28px;
+  color: $ink;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -0.015em;
+}
+
+// Headline numbers (items flagged `highlight` in the data).
+.keyFigures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0 0 40px;
+
+  @media (max-width: $mobile) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.figure {
+  dt {
+    color: $ink-muted;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 6px 0 0;
+    color: $ink;
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid $line;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (max-width: $mobile) {
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+}
+
+.tab {
+  position: relative;
+  flex-shrink: 0;
+  height: 48px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: $ink-muted;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 250ms $ease;
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    bottom: -1px;
+    left: 14px;
+    height: 1px;
+    background: $ink;
+    transform: scaleX(0);
+    transition: transform 300ms $ease;
+  }
+
+  &:hover {
+    color: $ink;
+  }
+
+  &[aria-selected="true"] {
+    color: $ink;
+
+    &::after {
+      transform: scaleX(1);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ink;
+    outline-offset: -4px;
+  }
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 48px;
+  margin: 0;
+  animation: fade-in 360ms $ease both;
+
+  @media (max-width: $mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid $line;
+
+  dt {
+    color: $ink-soft;
+    font-size: 14px;
+  }
+
+  dd {
+    margin: 0;
+    color: $ink;
+    font-size: 14px;
+    text-align: right;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list {
+    animation: none;
+  }
+}

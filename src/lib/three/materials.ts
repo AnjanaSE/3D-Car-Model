@@ -225,26 +225,47 @@ const HIGHLIGHT_SPEED = 10;
 
 type EmissiveMaterial = MeshStandardMaterial;
 
+/** Glow for features that can be switched on (e.g. headlights), keyed by feature id. */
+export type FeatureGlowMap = ReadonlyMap<string, { color: string; intensity: number }>;
+
 export interface FeatureHighlightController {
-  /** Eases each feature towards its target level. Returns true while still animating. */
-  update: (selectedId: string | null, hoveredId: string | null, delta: number) => boolean;
+  /**
+   * Eases each feature towards its target highlight and on/off glow levels.
+   * Returns true while anything is still animating.
+   */
+  update: (
+    selectedId: string | null,
+    hoveredId: string | null,
+    onIds: ReadonlySet<string>,
+    delta: number,
+  ) => boolean;
   /** Restores the materials' original emissive values. */
   reset: () => void;
 }
 
+/** Moves `current` towards `target`; snaps when close. */
+function approach(current: number, target: number, t: number) {
+  return Math.abs(target - current) < 0.01 ? target : MathUtils.lerp(current, target, t);
+}
+
 /**
- * Subtle emissive lift for the selected (full) and hovered (half) feature.
- * Works on the per-feature material clones made by `prepareVehicleModel`, and
- * remembers each material's own emissive (e.g. tail-light glow) to restore it.
+ * Subtle emissive lift for the selected (full) and hovered (half) feature, plus
+ * an "on" glow for switchable features. Works on the per-feature material
+ * clones made by `prepareVehicleModel`, and remembers each material's own
+ * emissive (e.g. tail-light glow) so it can be restored.
  */
 export function createFeatureHighlight(
   featureMaterials: Map<string, Material[]>,
+  glows: FeatureGlowMap = new Map(),
 ): FeatureHighlightController {
   const entries = [...featureMaterials].map(([featureId, materials]) => {
     const emissive = materials.filter((m): m is EmissiveMaterial => "emissive" in m);
+    const glow = glows.get(featureId);
     return {
       featureId,
       level: 0,
+      onLevel: 0,
+      glow: glow ? new Color(glow.color).multiplyScalar(glow.intensity) : null,
       materials: emissive.map((material) => ({
         material,
         base: material.emissive.clone().multiplyScalar(material.emissiveIntensity),
@@ -253,22 +274,26 @@ export function createFeatureHighlight(
     };
   });
 
+  const scratch = new Color();
   const apply = (entry: (typeof entries)[number]) => {
     for (const { material, base, lift } of entry.materials) {
       material.emissiveIntensity = 1;
       material.emissive.copy(lift).multiplyScalar(entry.level).add(base);
+      if (entry.glow) material.emissive.add(scratch.copy(entry.glow).multiplyScalar(entry.onLevel));
     }
   };
 
   return {
-    update(selectedId, hoveredId, delta) {
+    update(selectedId, hoveredId, onIds, delta) {
       const t = 1 - Math.exp(-HIGHLIGHT_SPEED * delta);
       let moving = false;
       for (const entry of entries) {
         const target = entry.featureId === selectedId ? 1 : entry.featureId === hoveredId ? HOVER_LEVEL : 0;
-        if (entry.level === target) continue;
-        entry.level = Math.abs(target - entry.level) < 0.01 ? target : MathUtils.lerp(entry.level, target, t);
-        if (entry.level !== target) moving = true;
+        const onTarget = entry.glow && onIds.has(entry.featureId) ? 1 : 0;
+        if (entry.level === target && entry.onLevel === onTarget) continue;
+        entry.level = approach(entry.level, target, t);
+        entry.onLevel = approach(entry.onLevel, onTarget, t);
+        if (entry.level !== target || entry.onLevel !== onTarget) moving = true;
         apply(entry);
       }
       return moving;
@@ -276,6 +301,7 @@ export function createFeatureHighlight(
     reset() {
       for (const entry of entries) {
         entry.level = 0;
+        entry.onLevel = 0;
         apply(entry);
       }
     },

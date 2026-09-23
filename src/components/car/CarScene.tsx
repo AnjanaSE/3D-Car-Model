@@ -16,7 +16,10 @@ interface CarSceneProps {
   paint: VehicleColor;
   features: VehicleFeature[];
   selectedFeatureId: string | null;
+  onFeatureIds: readonly string[];
   onSelectFeature: (featureId: string | null) => void;
+  /** Taps on the car; separate from `onSelectFeature` so taps can also toggle. */
+  onFeatureTap: (featureId: string | null) => void;
   debug?: boolean;
   cameraMove: CameraMove | null;
   vehicleBounds: Box3 | null;
@@ -52,7 +55,9 @@ export function CarScene({
   paint,
   features,
   selectedFeatureId,
+  onFeatureIds,
   onSelectFeature,
+  onFeatureTap,
   debug = false,
   cameraMove,
   vehicleBounds,
@@ -72,7 +77,7 @@ export function CarScene({
 
       <Suspense fallback={null}>
         <CarFeatureInteraction
-          onSelect={onSelectFeature}
+          onSelect={onFeatureTap}
           hoveredFeatureRef={hoveredFeatureRef}
           debug={debug}
         >
@@ -81,6 +86,7 @@ export function CarScene({
             paint={paint}
             features={features}
             selectedFeatureId={selectedFeatureId}
+            onFeatureIds={onFeatureIds}
             hoveredFeatureRef={hoveredFeatureRef}
             onReady={onReady}
           />

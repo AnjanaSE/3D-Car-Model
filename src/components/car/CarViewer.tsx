@@ -18,7 +18,11 @@ export interface CarViewerProps {
   paint: VehicleColor;
   features: VehicleFeature[];
   selectedFeatureId: string | null;
+  onFeatureIds: readonly string[];
+  /** Closing a feature (background tap, callout ×). */
   onSelectFeature: (featureId: string | null) => void;
+  /** A tap/click on a part of the car (or on bodywork that isn't a feature → null). */
+  onFeatureTap: (featureId: string | null) => void;
   cameraMove: CameraMove | null;
   fallbackImage?: VehicleImage;
   onUserInteract?: () => void;
@@ -34,7 +38,9 @@ export default function CarViewer({
   paint,
   features,
   selectedFeatureId,
+  onFeatureIds,
   onSelectFeature,
+  onFeatureTap,
   cameraMove,
   fallbackImage,
   onUserInteract,
@@ -84,7 +90,9 @@ export default function CarViewer({
             paint={paint}
             features={features}
             selectedFeatureId={selectedFeatureId}
+            onFeatureIds={onFeatureIds}
             onSelectFeature={onSelectFeature}
+            onFeatureTap={onFeatureTap}
             debug={debug}
             cameraMove={cameraMove}
             vehicleBounds={vehicleBounds}

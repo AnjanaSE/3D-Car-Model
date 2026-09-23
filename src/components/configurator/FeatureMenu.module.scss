@@ -1,14 +1,10 @@
 $ink: #121314;
-$ink-soft: #4a4d52;
 $ink-muted: #8a8d92;
-$line: #d9d9d6;
 $ease: cubic-bezier(0.22, 1, 0.36, 1);
 $mobile: 639px;
 
 .root {
-  margin-top: 40px;
-  padding-top: 28px;
-  border-top: 1px solid $line;
+  padding-top: 48px;
 }
 
 .heading {
@@ -75,55 +71,3 @@ $mobile: 639px;
   }
 }
 
-.detail {
-  min-height: 112px;
-  margin-top: 24px;
-}
-
-.detailBody {
-  max-width: 560px;
-  animation: detail-in 420ms $ease both;
-}
-
-.category {
-  display: block;
-  color: $ink-muted;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-}
-
-.title {
-  margin: 8px 0 0;
-  color: $ink;
-  font-size: 22px;
-  font-weight: 300;
-  letter-spacing: -0.01em;
-}
-
-.description {
-  margin: 8px 0 0;
-  color: $ink-soft;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.placeholder {
-  margin: 0;
-  color: $ink-muted;
-  font-size: 14px;
-}
-
-@keyframes detail-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .detailBody {
-    animation: none;
-  }
-}

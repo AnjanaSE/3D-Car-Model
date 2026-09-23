@@ -88,6 +88,20 @@ export interface VehicleFeatureCallout {
   label: Vec3;
 }
 
+/**
+ * Optional on/off state for a feature, e.g. headlights. Tapping the part on the
+ * car toggles it; the state is shown as "Status" in the details panel.
+ * Only give a feature a toggle if the model can show it.
+ */
+export interface VehicleFeatureToggle {
+  /** Status label, e.g. "Status". */
+  label: string;
+  onLabel: string;
+  offLabel: string;
+  /** Glow added to the feature's own meshes while on. */
+  emissive?: { color: string; intensity: number };
+}
+
 export interface VehicleFeature {
   id: string;
   title: string;
@@ -105,6 +119,7 @@ export interface VehicleFeature {
   /** Camera placement used when the feature is selected. */
   camera?: CameraView;
   callout: VehicleFeatureCallout;
+  toggle?: VehicleFeatureToggle;
 }
 
 /* -------------------------------------------------------------------------- */
