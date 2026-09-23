@@ -1,0 +1,122 @@
+// 3D feature callout card, pinned to the end of the leader line by drei <Html>.
+
+$ink: #121314;
+$ink-soft: #4a4d52;
+$ink-muted: #8a8d92;
+$ease: cubic-bezier(0.22, 1, 0.36, 1);
+$gap: 10px;
+
+// drei wraps the content in a zero-size positioned element at the 3D point.
+.anchor {
+  pointer-events: none;
+}
+
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: 250px;
+  padding: 14px 40px 15px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 1px 2px rgba(18, 19, 20, 0.06),
+    0 10px 30px -8px rgba(18, 19, 20, 0.22);
+  color: $ink;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  pointer-events: auto;
+  user-select: none;
+  animation: callout-in 420ms $ease both;
+
+  // Centre vertically on the line end, then sit to its left or right.
+  &[data-side="right"] {
+    transform: translate($gap, -50%);
+  }
+
+  &[data-side="left"] {
+    transform: translate(calc(-100% - #{$gap}), -50%);
+  }
+}
+
+.category {
+  display: block;
+  margin-bottom: 6px;
+  color: $ink-muted;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.description {
+  margin: 6px 0 0;
+  color: $ink-soft;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: $ink-muted;
+  cursor: pointer;
+  transition: background-color 200ms $ease, color 200ms $ease;
+
+  &:hover {
+    background: rgba(18, 19, 20, 0.06);
+    color: $ink;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ink;
+    outline-offset: 1px;
+  }
+}
+
+// Small viewers: keep the in-scene label short; the full description is shown
+// in the feature panel below the viewer.
+@container vehicle-viewer (max-width: 640px) {
+  .card {
+    max-width: 180px;
+    padding: 10px 34px 11px 12px;
+  }
+
+  .description {
+    display: none;
+  }
+
+  .close {
+    top: 4px;
+    right: 4px;
+  }
+}
+
+@keyframes callout-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+}
