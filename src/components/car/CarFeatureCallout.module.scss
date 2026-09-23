@@ -4,7 +4,6 @@ $ink: #121314;
 $ink-soft: #4a4d52;
 $ink-muted: #8a8d92;
 $ease: cubic-bezier(0.22, 1, 0.36, 1);
-$gap: 10px;
 
 // drei wraps the content in a zero-size positioned element at the 3D point.
 .anchor {
@@ -27,16 +26,10 @@ $gap: 10px;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   pointer-events: auto;
   user-select: none;
+  // Position (beside the line end, clamped to the viewer) is set per frame in
+  // CarFeatureCallout; start hidden until the first frame has placed it.
+  transform: translate(-9999px, 0);
   animation: callout-in 420ms $ease both;
-
-  // Centre vertically on the line end, then sit to its left or right.
-  &[data-side="right"] {
-    transform: translate($gap, -50%);
-  }
-
-  &[data-side="left"] {
-    transform: translate(calc(-100% - #{$gap}), -50%);
-  }
 }
 
 .category {

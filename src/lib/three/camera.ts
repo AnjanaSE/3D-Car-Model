@@ -99,7 +99,10 @@ export function fitViewToViewport(
   const { min, max } = getOrbitDistanceRange(limits, viewport.aspect);
 
   let distance = offset.length();
-  if (vehicleBounds && view.fitVehicle !== false) {
+  if (view.fitVehicle === false) {
+    // Close-ups: pull back gently on narrow screens so the part keeps some context.
+    distance *= Math.sqrt(getDistanceScale(viewport.aspect));
+  } else if (vehicleBounds) {
     const direction = offset.clone().normalize();
     distance = Math.max(
       distance,

@@ -17,7 +17,7 @@ npm run dev          # http://localhost:3000 → redirects to /car/demo
 
 ## Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Three.js · @react-three/fiber · @react-three/drei · Tailwind CSS 4
+Next.js 16 (App Router) · React 19 · TypeScript · Three.js · @react-three/fiber · @react-three/drei · Tailwind CSS 4 · SCSS modules (feature UI)
 
 ## Structure
 
@@ -66,6 +66,29 @@ To switch sources, fetch and map the API response to `Vehicle` in `page.tsx`.
 
 Camera presets are authored in metres around the grounded, centred model. On narrow screens the
 camera pulls back automatically, using the model's real bounds, so the whole car stays in frame.
+
+## Clickable features
+
+Tapping or clicking a part of the car selects it. The part is highlighted, a 3D leader line with a
+label appears, the camera eases towards the part, and the details show in the Features panel below
+the viewer. The Features menu uses the same `selectFeature()` state.
+
+Each entry in `vehicle.features` can use either method, or both:
+
+- **`meshNames`**: GLB meshes that select the feature directly. Use this only when the part really is
+  its own mesh.
+- **`hitAreas`**: invisible spheres or boxes, for parts merged into another mesh. For example, the
+  mirrors and doors here are part of `body`, and the headlight lenses are part of `glass`.
+
+A click counts as a tap only if the pointer moves 5 px or less. Anything more is left to
+OrbitControls as a rotate.
+
+### Debug mode (development only)
+
+Open `/car/demo?debug=vehicle`, or set `NEXT_PUBLIC_VEHICLE_DEBUG=true` in `.env.local`. Hit areas are
+drawn as wireframes, and each click logs the mesh, material, feature, and world/local position of
+the hit. When a hit area is in front, the car surface behind it is logged too. Paste those
+coordinates into `hitAreas` / `callout`.
 
 ## Model credit
 

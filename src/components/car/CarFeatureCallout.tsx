@@ -9,6 +9,9 @@ import styles from "./CarFeatureCallout.module.scss";
 
 /** Drawn over the car so the leader line never disappears behind bodywork. */
 const OVERLAY_RENDER_ORDER = 10;
+/** Gap between the line end and the card, and minimum margin to the viewer edge (px). */
+const CARD_GAP = 10;
+const EDGE_MARGIN = 12;
 
 interface CarFeatureCalloutProps {
   feature: VehicleFeature;
@@ -24,15 +27,27 @@ export function CarFeatureCallout({ feature, onClose }: CarFeatureCalloutProps) 
   const cardRef = useRef<HTMLDivElement>(null);
   const projected = useRef({ anchor: new Vector3(), label: new Vector3() });
 
-  // Put the card on whichever side of the line end faces away from the car.
-  useFrame(({ camera }) => {
+  // Place the card beside the line end, on the side facing away from the car,
+  // and keep it inside the viewer. Runs only on rendered frames, and writes the
+  // DOM directly, so the card follows the camera without React re-renders.
+  useFrame(({ camera, size }) => {
     const card = cardRef.current;
     if (!card) return;
     const p = projected.current;
     p.anchor.set(...anchor).project(camera);
     p.label.set(...label).project(camera);
+
+    const x = ((p.label.x + 1) / 2) * size.width;
+    const y = ((1 - p.label.y) / 2) * size.height;
+    const width = card.offsetWidth;
+    const height = card.offsetHeight;
     const side = p.label.x >= p.anchor.x ? "right" : "left";
-    if (card.dataset.side !== side) card.dataset.side = side;
+
+    const left = side === "right" ? x + CARD_GAP : x - CARD_GAP - width;
+    const clampedLeft = Math.min(Math.max(left, EDGE_MARGIN), size.width - width - EDGE_MARGIN);
+    const top = Math.min(Math.max(y - height / 2, EDGE_MARGIN), size.height - height - EDGE_MARGIN);
+
+    card.style.transform = `translate(${Math.round(clampedLeft - x)}px, ${Math.round(top - y)}px)`;
   });
 
   return (
@@ -55,7 +70,7 @@ export function CarFeatureCallout({ feature, onClose }: CarFeatureCalloutProps) 
       </mesh>
 
       <Html position={label} zIndexRange={[20, 0]} className={styles.anchor}>
-        <div ref={cardRef} className={styles.card} data-side="right" key={feature.id}>
+        <div ref={cardRef} className={styles.card}>
           <span className={styles.category}>{feature.category}</span>
           <h3 className={styles.title}>{feature.title}</h3>
           <p className={styles.description}>{feature.description}</p>

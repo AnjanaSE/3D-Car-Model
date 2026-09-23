@@ -214,9 +214,12 @@ export function dampPaint(
 /* Feature highlight                                                           */
 /* -------------------------------------------------------------------------- */
 
-const HIGHLIGHT_COLOR = new Color("#ffffff");
-/** Emissive mix at full highlight. Kept low so the part brightens, not glows. */
-const HIGHLIGHT_STRENGTH = 0.18;
+/**
+ * Emissive added at full highlight, as a fraction of the material's own colour.
+ * Scaling by the part's colour (rather than adding white) brightens chrome and
+ * lights clearly while leaving black rubber black instead of turning it grey.
+ */
+const HIGHLIGHT_STRENGTH = 0.15;
 const HOVER_LEVEL = 0.5;
 const HIGHLIGHT_SPEED = 10;
 
@@ -245,14 +248,15 @@ export function createFeatureHighlight(
       materials: emissive.map((material) => ({
         material,
         base: material.emissive.clone().multiplyScalar(material.emissiveIntensity),
+        lift: material.color.clone().multiplyScalar(HIGHLIGHT_STRENGTH),
       })),
     };
   });
 
   const apply = (entry: (typeof entries)[number]) => {
-    for (const { material, base } of entry.materials) {
+    for (const { material, base, lift } of entry.materials) {
       material.emissiveIntensity = 1;
-      material.emissive.copy(base).lerp(HIGHLIGHT_COLOR, entry.level * HIGHLIGHT_STRENGTH);
+      material.emissive.copy(lift).multiplyScalar(entry.level).add(base);
     }
   };
 
