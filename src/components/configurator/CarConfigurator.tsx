@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import type { CameraView, Vehicle } from "@/types/vehicle";
+import type { CameraView, Vehicle, VehicleViewModeId } from "@/types/vehicle";
 import { getCameraPreset, type CameraMove } from "@/lib/three/camera";
 import { scrollToVehicleDetails } from "@/lib/configurator/scroll";
 import { CarLoader } from "@/components/car/CarLoader";
 import { CameraControls } from "./CameraControls";
 import { ColorSelector } from "./ColorSelector";
+import { ViewModeSelector } from "./ViewModeSelector";
 import { VehicleDetails } from "./VehicleDetails";
 import { useVehicleInteraction, type VehicleInteractionState } from "./useVehicleInteraction";
 
@@ -48,6 +49,7 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
     key: 0,
     immediate: true,
   }));
+  const [viewModeId, setViewModeId] = useState<VehicleViewModeId>("exterior");
   const [state, actions] = useVehicleInteraction(vehicle.defaultColorId);
   const { clearFeature, selectFeature, toggleFeature, selectColour, markVehicleInteraction } = actions;
 
@@ -61,6 +63,13 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
     [state.featureOn],
   );
 
+  const viewMode = vehicle.viewModes.find((mode) => mode.id === viewModeId);
+  // Each view mode can tighten the orbit (e.g. a short range inside the cabin).
+  const orbitLimits = useMemo(
+    () => ({ ...vehicle.model.orbit, ...viewMode?.orbit }),
+    [vehicle.model.orbit, viewMode],
+  );
+
   const viewPresets = useMemo(
     () => vehicle.cameraPresets.filter((p) => p.id !== defaultPresetId),
     [vehicle.cameraPresets, defaultPresetId],
@@ -71,8 +80,10 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
   }, []);
 
   // Camera presets are exploration: they close any open feature but never count as interaction.
+  // They are exterior views, so they also leave the interior.
   const goToPreset = useCallback(
     (presetId: string) => {
+      setViewModeId("exterior");
       setActivePresetId(presetId);
       clearFeature();
       moveCamera(getCameraPreset(vehicle, presetId));
@@ -80,7 +91,29 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
     [vehicle, clearFeature, moveCamera],
   );
 
-  const resetView = useCallback(() => goToPreset(defaultPresetId), [goToPreset, defaultPresetId]);
+  /** Exterior ↔ interior. Exploration too: it moves the camera but doesn't reveal the details. */
+  const selectViewMode = useCallback(
+    (id: VehicleViewModeId) => {
+      const mode = vehicle.viewModes.find((m) => m.id === id);
+      if (!mode?.available) return;
+      clearFeature();
+      setViewModeId(id);
+      if (mode.camera) {
+        setActivePresetId(null);
+        moveCamera(mode.camera, false);
+      } else {
+        setActivePresetId(defaultPresetId);
+        moveCamera(getCameraPreset(vehicle, defaultPresetId));
+      }
+    },
+    [vehicle, clearFeature, moveCamera, defaultPresetId],
+  );
+
+  // Reset returns to the start of the current view.
+  const resetView = useCallback(
+    () => (viewModeId === "exterior" ? goToPreset(defaultPresetId) : selectViewMode(viewModeId)),
+    [viewModeId, goToPreset, defaultPresetId, selectViewMode],
+  );
 
   // Dragging/zooming leaves any named view, so un-highlight the preset buttons.
   const handleUserInteract = useCallback(() => setActivePresetId(null), []);
@@ -88,7 +121,10 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
   const focusFeature = useCallback(
     (featureId: string) => {
       const feature = vehicle.features.find((f) => f.id === featureId);
-      if (!feature?.camera) return;
+      if (!feature) return;
+      // A feature lives in one view (e.g. the steering wheel is interior); go there.
+      setViewModeId(feature.viewMode ?? "exterior");
+      if (!feature.camera) return;
       setActivePresetId(null);
       moveCamera(feature.camera, false);
     },
@@ -169,6 +205,8 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
             <div className="absolute inset-0">
               <CarViewer
                 model={vehicle.model}
+                orbitLimits={orbitLimits}
+                viewMode={viewModeId}
                 paint={paint}
                 features={vehicle.features}
                 selectedFeatureId={state.selectedFeatureId}
@@ -180,6 +218,7 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
                 onUserInteract={handleUserInteract}
               />
             </div>
+            <ViewModeSelector modes={vehicle.viewModes} activeId={viewModeId} onSelect={selectViewMode} />
           </div>
 
           <div className="border-t border-line pt-2 pb-3 sm:pb-4">
@@ -210,6 +249,8 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
                     </svg>
                   </button>
                 </>
+              ) : viewMode?.hint ? (
+                <span>{viewMode.hint} · Tap a part to explore</span>
               ) : (
                 <>
                   <span className="pointer-coarse:hidden">Drag to rotate · Scroll to zoom · Click a part to explore</span>

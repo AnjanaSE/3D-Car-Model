@@ -38,9 +38,14 @@ export const demoVehicle: Vehicle = {
       brakes: { meshes: ["brake"] },
       headlights: { meshes: ["lights", "leds"] },
       taillights: { meshes: ["lights_red", "brakes"] },
-      // "yellow_trim" (badge accents) is neutralised to chrome for the demo.
-      chrome: { meshes: ["chrome", "metal", "yellow_trim"] },
-      trim: { meshes: ["plastic_gray", "grills", "wipers", "interior_dark"] },
+      // Badge accents ("yellow_trim", the steering-wheel centre) are neutralised to chrome for the demo.
+      chrome: { meshes: ["chrome", "metal", "yellow_trim", "steering_centre"] },
+      // The GLB's "Carbon_Fiber" and "Carpet" materials are untextured 80% grey,
+      // which reads as white in the cabin; render them satin black instead.
+      trim: {
+        meshes: ["plastic_gray", "grills", "wipers", "interior_dark"],
+        materials: ["Carbon_Fiber", "Carpet"],
+      },
       interior: {
         meshes: [
           "trim",
@@ -132,6 +137,16 @@ export const demoVehicle: Vehicle = {
         { id: "brakes", label: "Brakes", value: "Carbon-ceramic discs" },
         { id: "stability", label: "Stability Control", value: "Multi-mode ESC" },
         { id: "camera", label: "Parking Aid", value: "360° surround camera" },
+      ],
+    },
+    {
+      id: "interior",
+      title: "Interior",
+      items: [
+        { id: "seats", label: "Seats", value: "2 × electrically adjustable sport seats" },
+        { id: "upholstery", label: "Upholstery", value: "Full-grain leather, contrast stitching" },
+        { id: "steering", label: "Steering Wheel", value: "Carbon fibre with LED shift lights" },
+        { id: "trim", label: "Trim", value: "Carbon fibre and brushed aluminium" },
       ],
     },
     {
@@ -248,6 +263,42 @@ export const demoVehicle: Vehicle = {
       camera: { position: [3.2, 3.2, -3.6], target: [0, 0.9, -0.6] },
       callout: { anchor: [0, 1.05, -0.75], elbow: [0.5, 1.6, -1.0], label: [1.0, 1.6, -1.0] },
     },
+    {
+      id: "steering-wheel",
+      title: "Carbon Steering Wheel",
+      category: "Interior",
+      description:
+        "A flat-bottomed carbon-fibre wheel with LED shift lights, so the essential controls stay at your fingertips.",
+      meshNames: ["steering_*"],
+      viewMode: "interior",
+      camera: { position: [0.45, 1.45, -0.6], target: [0.35, 0.82, 0.38] },
+      callout: { anchor: [0.35, 0.96, 0.36], elbow: [0.55, 1.05, 0.42], label: [0.8, 1.05, 0.42] },
+    },
+    {
+      id: "seats",
+      title: "Full-Grain Leather Sport Seats",
+      category: "Interior",
+      description:
+        "Electrically adjustable sport seats in full-grain leather with contrast stitching, shaped to hold you through fast corners.",
+      meshNames: ["leather", "trim"],
+      viewMode: "interior",
+      // Over the passenger door, so the windscreen frame doesn't block the seats.
+      camera: { position: [-1.3, 1.9, -0.2], target: [0, 0.85, -0.35] },
+      callout: { anchor: [-0.3, 1.08, -0.32], elbow: [-0.55, 1.4, -0.55], label: [-0.7, 1.45, -0.85] },
+    },
+    {
+      id: "driver-display",
+      title: "Digital Driver Display",
+      category: "Interior",
+      description:
+        "A configurable digital instrument cluster puts speed, navigation and performance data directly in your line of sight.",
+      // The cluster is mostly part of a generic interior mesh, so it also gets a hit box.
+      meshNames: ["carbon_fibre"],
+      hitAreas: [{ type: "box", position: [0.35, 0.85, 0.55], size: [0.36, 0.14, 0.2] }],
+      viewMode: "interior",
+      camera: { position: [0.4, 1.4, -0.35], target: [0.33, 0.85, 0.55] },
+      callout: { anchor: [0.33, 0.87, 0.55], elbow: [0.12, 0.98, 0.58], label: [-0.15, 0.98, 0.58] },
+    },
   ],
 
   cameraPresets: [
@@ -262,7 +313,15 @@ export const demoVehicle: Vehicle = {
 
   viewModes: [
     { id: "exterior", label: "Exterior", available: true },
-    { id: "interior", label: "Interior", available: false },
+    {
+      id: "interior",
+      label: "Interior",
+      available: true,
+      // Over the driver's shoulder (left-hand drive: the driver sits on the +X side).
+      camera: { position: [0.3, 1.95, -1.45], target: [0.05, 0.72, 0.2] },
+      orbit: { minDistance: 0.9, maxDistance: 2.6, minPolarAngle: 0.25, maxPolarAngle: 1.15 },
+      hint: "Drag to look around the cabin",
+    },
   ],
 
   modelCredit: {

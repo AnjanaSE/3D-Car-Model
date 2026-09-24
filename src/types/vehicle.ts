@@ -120,6 +120,8 @@ export interface VehicleFeature {
   camera?: CameraView;
   callout: VehicleFeatureCallout;
   toggle?: VehicleFeatureToggle;
+  /** View the feature belongs to; selecting it switches to that view. Default "exterior". */
+  viewMode?: VehicleViewModeId;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -131,8 +133,13 @@ export type VehicleViewModeId = "exterior" | "interior";
 export interface VehicleViewMode {
   id: VehicleViewModeId;
   label: string;
-  /** Interior is prepared in the data model but not yet implemented in 3D. */
   available: boolean;
+  /** Where the camera goes when this mode is chosen. Defaults to the default camera preset. */
+  camera?: CameraView;
+  /** Orbit limits in this mode, merged over `model.orbit` (e.g. a tighter range inside the cabin). */
+  orbit?: Partial<VehicleOrbitLimits>;
+  /** Short usage hint shown under the viewer in this mode. */
+  hint?: string;
 }
 
 /* -------------------------------------------------------------------------- */

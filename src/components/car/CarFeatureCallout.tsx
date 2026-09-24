@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html, Line } from "@react-three/drei";
-import { Vector3 } from "three";
+import { Vector3, type Group } from "three";
 import type { VehicleFeature } from "@/types/vehicle";
 import styles from "./CarFeatureCallout.module.scss";
 
@@ -12,6 +12,8 @@ const OVERLAY_RENDER_ORDER = 10;
 /** Gap between the line end and the card, and minimum margin to the viewer edge (px). */
 const CARD_GAP = 10;
 const EDGE_MARGIN = 12;
+/** Anchor dot radius as a fraction of camera distance: a constant size on screen, near or far. */
+const DOT_SCALE = 0.0075;
 
 interface CarFeatureCalloutProps {
   feature: VehicleFeature;
@@ -26,6 +28,7 @@ export function CarFeatureCallout({ feature, onClose }: CarFeatureCalloutProps) 
   const { anchor, elbow, label } = feature.callout;
   const cardRef = useRef<HTMLDivElement>(null);
   const projected = useRef({ anchor: new Vector3(), label: new Vector3() });
+  const dotRef = useRef<Group>(null);
 
   // Place the card beside the line end, on the side facing away from the car,
   // and keep it inside the viewer. Runs only on rendered frames, and writes the
@@ -34,7 +37,8 @@ export function CarFeatureCallout({ feature, onClose }: CarFeatureCalloutProps) 
     const card = cardRef.current;
     if (!card) return;
     const p = projected.current;
-    p.anchor.set(...anchor).project(camera);
+    dotRef.current?.scale.setScalar(camera.position.distanceTo(p.anchor.set(...anchor)) * DOT_SCALE);
+    p.anchor.project(camera);
     p.label.set(...label).project(camera);
 
     const x = ((p.label.x + 1) / 2) * size.width;
@@ -60,14 +64,16 @@ export function CarFeatureCallout({ feature, onClose }: CarFeatureCalloutProps) 
         depthTest={false}
         renderOrder={OVERLAY_RENDER_ORDER}
       />
-      <mesh position={anchor} renderOrder={OVERLAY_RENDER_ORDER}>
-        <sphereGeometry args={[0.045, 20, 16]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} />
-      </mesh>
-      <mesh position={anchor} renderOrder={OVERLAY_RENDER_ORDER + 1}>
-        <sphereGeometry args={[0.024, 16, 12]} />
-        <meshBasicMaterial color="#121314" depthTest={false} />
-      </mesh>
+      <group ref={dotRef} position={anchor}>
+        <mesh renderOrder={OVERLAY_RENDER_ORDER}>
+          <sphereGeometry args={[1, 20, 16]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} />
+        </mesh>
+        <mesh renderOrder={OVERLAY_RENDER_ORDER + 1}>
+          <sphereGeometry args={[0.53, 16, 12]} />
+          <meshBasicMaterial color="#121314" depthTest={false} />
+        </mesh>
+      </group>
 
       <Html position={label} zIndexRange={[20, 0]} className={styles.anchor}>
         <div ref={cardRef} className={styles.card}>

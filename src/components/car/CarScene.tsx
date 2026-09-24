@@ -1,9 +1,15 @@
 "use client";
 
-import { Suspense, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import type { Box3 } from "three";
 import { ContactShadows, Environment, Lightformer, OrbitControls } from "@react-three/drei";
-import type { Vehicle3DConfig, VehicleColor, VehicleFeature } from "@/types/vehicle";
+import type {
+  Vehicle3DConfig,
+  VehicleColor,
+  VehicleFeature,
+  VehicleOrbitLimits,
+  VehicleViewModeId,
+} from "@/types/vehicle";
 import type { CameraMove } from "@/lib/three/camera";
 import { CarModel } from "./CarModel";
 import { CarCameraController } from "./CarCameraController";
@@ -13,8 +19,12 @@ import { CarFeatureCallout } from "./CarFeatureCallout";
 
 interface CarSceneProps {
   model: Vehicle3DConfig;
+  /** Active orbit limits (vary by view mode); defaults to `model.orbit`. */
+  orbitLimits?: VehicleOrbitLimits;
   paint: VehicleColor;
   features: VehicleFeature[];
+  /** Only this view's invisible hit areas are active, so exterior proxies don't block cabin taps. */
+  viewMode?: VehicleViewModeId;
   selectedFeatureId: string | null;
   onFeatureIds: readonly string[];
   onSelectFeature: (featureId: string | null) => void;
@@ -52,8 +62,10 @@ function StudioEnvironment() {
 
 export function CarScene({
   model,
+  orbitLimits,
   paint,
   features,
+  viewMode = "exterior",
   selectedFeatureId,
   onFeatureIds,
   onSelectFeature,
@@ -64,9 +76,13 @@ export function CarScene({
   onReady,
   onUserInteract,
 }: CarSceneProps) {
-  const { orbit } = model;
+  const orbit = orbitLimits ?? model.orbit;
   const hoveredFeatureRef = useRef<string | null>(null);
   const selectedFeature = features.find((feature) => feature.id === selectedFeatureId) ?? null;
+  const hitAreaFeatures = useMemo(
+    () => features.filter((feature) => (feature.viewMode ?? "exterior") === viewMode),
+    [features, viewMode],
+  );
 
   return (
     <>
@@ -90,7 +106,7 @@ export function CarScene({
             hoveredFeatureRef={hoveredFeatureRef}
             onReady={onReady}
           />
-          <CarFeatureHitAreas features={features} debug={debug} />
+          <CarFeatureHitAreas features={hitAreaFeatures} debug={debug} />
         </CarFeatureInteraction>
         {selectedFeature && (
           <CarFeatureCallout
@@ -123,10 +139,7 @@ export function CarScene({
         dampingFactor={0.08}
         rotateSpeed={0.55}
         zoomSpeed={0.7}
-        minDistance={orbit.minDistance}
-        maxDistance={orbit.maxDistance}
-        minPolarAngle={orbit.minPolarAngle}
-        maxPolarAngle={orbit.maxPolarAngle}
+        // Distance and polar limits are managed by CarCameraController (they vary by view mode).
       />
       <CarCameraController
         move={cameraMove}

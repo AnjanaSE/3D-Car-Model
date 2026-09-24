@@ -3,7 +3,14 @@
 import { useCallback, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import type { Box3 } from "three";
-import type { Vehicle3DConfig, VehicleColor, VehicleFeature, VehicleImage } from "@/types/vehicle";
+import type {
+  Vehicle3DConfig,
+  VehicleColor,
+  VehicleFeature,
+  VehicleImage,
+  VehicleOrbitLimits,
+  VehicleViewModeId,
+} from "@/types/vehicle";
 import type { CameraMove } from "@/lib/three/camera";
 import { isWebGLAvailable } from "@/lib/three/webgl";
 import { isVehicleDebugEnabled } from "@/lib/three/debug";
@@ -15,6 +22,8 @@ import { clearCarModel } from "./CarModel";
 
 export interface CarViewerProps {
   model: Vehicle3DConfig;
+  orbitLimits?: VehicleOrbitLimits;
+  viewMode?: VehicleViewModeId;
   paint: VehicleColor;
   features: VehicleFeature[];
   selectedFeatureId: string | null;
@@ -35,6 +44,8 @@ export interface CarViewerProps {
  */
 export default function CarViewer({
   model,
+  orbitLimits,
+  viewMode,
   paint,
   features,
   selectedFeatureId,
@@ -87,6 +98,8 @@ export default function CarViewer({
         >
           <CarScene
             model={model}
+            orbitLimits={orbitLimits}
+            viewMode={viewMode}
             paint={paint}
             features={features}
             selectedFeatureId={selectedFeatureId}

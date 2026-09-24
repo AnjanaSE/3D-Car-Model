@@ -26,6 +26,27 @@ interface CarCameraControllerProps {
   onUserInteract?: () => void;
 }
 
+/** Applies the orbit limits (zoom range scaled for the viewport shape, vertical range). */
+function applyLimits(controls: OrbitControlsImpl, limits: VehicleOrbitLimits, aspect: number) {
+  const range = getOrbitDistanceRange(limits, aspect);
+  controls.minDistance = range.min;
+  controls.maxDistance = range.max;
+  controls.minPolarAngle = limits.minPolarAngle;
+  controls.maxPolarAngle = limits.maxPolarAngle;
+}
+
+/**
+ * Lifts the limits while the camera flies between views with different limits
+ * (e.g. outside the car → cabin), so OrbitControls doesn't snap the camera
+ * into the new range on the first frame. Limits are re-applied once it settles.
+ */
+function relaxLimits(controls: OrbitControlsImpl) {
+  controls.minDistance = 0;
+  controls.maxDistance = Infinity;
+  controls.minPolarAngle = 0;
+  controls.maxPolarAngle = Math.PI;
+}
+
 /** Three.js objects are read from the store at use time rather than captured from hooks, since we mutate them. */
 function getRig(state: RootState) {
   return {
@@ -60,13 +81,18 @@ export function CarCameraController({
     offset: new Vector3(),
   });
 
-  // Keep the zoom range in step with the viewport shape (narrow screens need more room).
+  // Latest limits, for re-applying them when a transition settles.
+  const limitsRef = useRef(limits);
+  useEffect(() => {
+    limitsRef.current = limits;
+  }, [limits]);
+
+  // Keep the limits in step with the view mode and viewport shape — but not
+  // mid-transition; they're applied when the camera arrives.
   useEffect(() => {
     const { controls } = getRig(get());
-    if (!controls) return;
-    const range = getOrbitDistanceRange(limits, aspect);
-    controls.minDistance = range.min;
-    controls.maxDistance = range.max;
+    if (!controls || transition.current.active) return;
+    applyLimits(controls, limits, aspect);
     controls.update();
     get().invalidate();
   }, [get, controlsReady, limits, aspect]);
@@ -92,10 +118,12 @@ export function CarCameraController({
 
     if (move.immediate) {
       t.active = false;
+      applyLimits(controls, limits, currentAspect);
       camera.position.copy(fitted.position);
       controls.target.copy(fitted.target);
       controls.update();
     } else {
+      relaxLimits(controls);
       t.target.copy(controls.target);
       t.orbit.setFromVector3(t.offset.copy(camera.position).sub(controls.target));
       t.goalTarget.copy(fitted.target);
@@ -110,7 +138,10 @@ export function CarCameraController({
     const { controls } = getRig(get());
     if (!controls) return;
     const handleStart = () => {
-      transition.current.active = false;
+      if (transition.current.active) {
+        transition.current.active = false;
+        applyLimits(controls, limitsRef.current, getRig(get()).aspect);
+      }
       onUserInteract?.();
     };
     controls.addEventListener("start", handleStart);
@@ -130,6 +161,7 @@ export function CarCameraController({
       t.target.copy(t.goalTarget);
       t.orbit.copy(t.goalOrbit);
       t.active = false;
+      applyLimits(controls, limitsRef.current, state.size.width / Math.max(state.size.height, 1));
     }
 
     controls.target.copy(t.target);
