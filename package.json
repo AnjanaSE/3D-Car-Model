@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "inspect:model": "node scripts/inspect-model.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate:sedan": "node scripts/generate-sedan.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

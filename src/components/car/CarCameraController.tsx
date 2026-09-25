@@ -33,6 +33,8 @@ function applyLimits(controls: OrbitControlsImpl, limits: VehicleOrbitLimits, as
   controls.maxDistance = range.max;
   controls.minPolarAngle = limits.minPolarAngle;
   controls.maxPolarAngle = limits.maxPolarAngle;
+  controls.minAzimuthAngle = limits.minAzimuthAngle ?? -Infinity;
+  controls.maxAzimuthAngle = limits.maxAzimuthAngle ?? Infinity;
 }
 
 /**
@@ -45,6 +47,8 @@ function relaxLimits(controls: OrbitControlsImpl) {
   controls.maxDistance = Infinity;
   controls.minPolarAngle = 0;
   controls.maxPolarAngle = Math.PI;
+  controls.minAzimuthAngle = -Infinity;
+  controls.maxAzimuthAngle = Infinity;
 }
 
 /** Three.js objects are read from the store at use time rather than captured from hooks, since we mutate them. */
@@ -151,6 +155,15 @@ export function CarCameraController({
   useFrame((state, delta) => {
     const t = transition.current;
     const { camera, controls } = getRig(state);
+
+    // Ease the lens towards the current view's field of view (e.g. wide inside the cabin).
+    const fovGoal = limitsRef.current.fov;
+    if (Math.abs(camera.fov - fovGoal) > 0.01) {
+      camera.fov = Math.abs(camera.fov - fovGoal) < 0.05 ? fovGoal : camera.fov + (fovGoal - camera.fov) * (1 - Math.exp(-TRANSITION_SPEED * Math.min(delta, 0.1)));
+      camera.updateProjectionMatrix();
+      state.invalidate();
+    }
+
     if (!t.active || !controls) return;
 
     const dt = Math.min(delta, 0.1);

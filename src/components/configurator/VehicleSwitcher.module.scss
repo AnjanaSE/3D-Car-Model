@@ -1,0 +1,66 @@
+@use "../../styles/tokens" as *;
+
+.root {
+  @include glass-panel;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 38px 0 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 250ms $ease;
+
+  &:hover,
+  &:focus-within {
+    border-color: rgba(59, 139, 255, 0.7);
+  }
+
+  &:focus-within {
+    outline: 2px solid $ink;
+    outline-offset: 2px;
+  }
+}
+
+.label {
+  color: $ink-muted;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+
+  @media (max-width: $mobile) {
+    display: none;
+  }
+}
+
+.select {
+  appearance: none;
+  max-width: 190px;
+  border: 0;
+  background: transparent;
+  color: $ink;
+  font: inherit;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  outline: none;
+
+  // The open list uses the OS menu; keep its options readable on dark UI.
+  option {
+    background: $surface;
+    color: $ink;
+  }
+
+  @media (max-width: $mobile) {
+    max-width: 130px;
+    font-size: 13px;
+  }
+}
+
+.chevron {
+  position: absolute;
+  right: 16px;
+  color: $ink-soft;
+  pointer-events: none;
+}

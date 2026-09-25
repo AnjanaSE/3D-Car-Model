@@ -74,9 +74,17 @@
   }
 
   @media (max-width: $mobile) {
-    top: 18px;
+    top: 16px;
     right: 16px;
     left: 16px;
+    // Name + full-screen on the first row; the model switcher gets its own row.
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+
+    > div:first-child {
+      min-width: 0;
+    }
   }
 }
 
@@ -89,8 +97,11 @@
   text-transform: uppercase;
 
   @media (max-width: $mobile) {
+    overflow: hidden;
     font-size: 19px;
     letter-spacing: 0.05em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -102,7 +113,11 @@
   text-transform: uppercase;
 
   @media (max-width: $mobile) {
+    overflow: hidden;
+    margin-top: 6px;
     font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -110,6 +125,17 @@
   display: flex;
   align-items: center;
   gap: 16px;
+
+  @media (max-width: $mobile) {
+    display: contents;
+
+    // The model switcher (a <label>) spans the second row.
+    > label {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: start;
+    }
+  }
 }
 
 .price {
@@ -160,7 +186,7 @@
   transform: translateY(-62%);
 
   @media (max-width: $mobile) {
-    top: 86px;
+    top: 136px;
     right: 0;
     left: 0;
     transform: none;

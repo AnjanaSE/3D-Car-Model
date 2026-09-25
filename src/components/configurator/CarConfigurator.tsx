@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import type { CameraView, Vehicle, VehicleViewModeId } from "@/types/vehicle";
 import { getCameraPreset, type CameraMove } from "@/lib/three/camera";
@@ -23,6 +23,8 @@ const CarViewer = dynamic(() => import("@/components/car/CarViewer"), {
 
 interface CarConfiguratorProps {
   vehicle: Vehicle;
+  /** Optional model picker shown in the header (see VehicleShowroom). */
+  vehicleSwitcher?: ReactNode;
 }
 
 /** One-line summary of the latest selection, shown under the car once details exist. */
@@ -44,7 +46,7 @@ function selectionSummary(vehicle: Vehicle, state: VehicleInteractionState): str
  * appear after the first meaningful selection (see `useVehicleInteraction`).
  * Camera exploration — rotate, zoom, view presets — never reveals them.
  */
-export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
+export function CarConfigurator({ vehicle, vehicleSwitcher }: CarConfiguratorProps) {
   const defaultPresetId = vehicle.defaultCameraPresetId;
   const [activePresetId, setActivePresetId] = useState<string | null>(defaultPresetId);
   const [cameraMove, setCameraMove] = useState<CameraMove>(() => ({
@@ -262,6 +264,7 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
             <p className={styles.subtitle}>{vehicle.subtitle}</p>
           </div>
           <div className={styles.headerActions}>
+            {vehicleSwitcher}
             <p className={styles.price}>
               Starting from <strong>{vehicle.startingPrice}</strong>
             </p>
@@ -349,14 +352,18 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
 
       {vehicle.modelCredit && (
         <footer className="py-6 text-center text-[11px] text-ink-muted">
-          <a
-            href={vehicle.modelCredit.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline-offset-4 hover:underline"
-          >
-            {vehicle.modelCredit.text}
-          </a>
+          {vehicle.modelCredit.href ? (
+            <a
+              href={vehicle.modelCredit.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-4 hover:underline"
+            >
+              {vehicle.modelCredit.text}
+            </a>
+          ) : (
+            vehicle.modelCredit.text
+          )}
         </footer>
       )}
     </>

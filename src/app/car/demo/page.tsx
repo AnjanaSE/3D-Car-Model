@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
 import { preload } from "react-dom";
-import { demoVehicle } from "@/data/demo-car";
-import { CarConfigurator } from "@/components/configurator/CarConfigurator";
+import { findVehicle, vehicles } from "@/data/vehicles";
+import { VehicleShowroom } from "@/components/configurator/VehicleShowroom";
 
 export const metadata: Metadata = {
-  title: `${demoVehicle.name} · Configurator`,
-  description: `Explore the ${demoVehicle.name} in 3D. ${demoVehicle.subtitle}, starting from ${demoVehicle.startingPrice}.`,
+  title: "Vehicle Configurator",
+  description: `Explore ${vehicles.map((v) => v.name).join(" and ")} in 3D.`,
 };
 
-export default function CarDemoPage() {
-  // Start downloading the GLB alongside the viewer's JS chunk instead of after it.
-  preload(demoVehicle.model.url, { as: "fetch", crossOrigin: "anonymous" });
+export default async function CarDemoPage({ searchParams }: PageProps<"/car/demo">) {
+  const { car } = await searchParams;
+  const vehicle = findVehicle(typeof car === "string" ? car : undefined);
+
+  // Start downloading the chosen car's GLB alongside the viewer's JS chunk.
+  preload(vehicle.model.url, { as: "fetch", crossOrigin: "anonymous" });
 
   return (
     <main>
-      <CarConfigurator vehicle={demoVehicle} />
+      <VehicleShowroom vehicles={vehicles} initialVehicleId={vehicle.id} />
     </main>
   );
 }

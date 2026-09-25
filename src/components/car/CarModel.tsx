@@ -8,6 +8,7 @@ import type { Vehicle3DConfig, VehicleColor, VehicleFeature } from "@/types/vehi
 import { applyPaint, dampPaint, resolvePaint } from "@/lib/three/materials";
 import { logModelInspection, prepareVehicleModel } from "@/lib/three/model";
 import { CarFeatureHighlight } from "./CarFeatureHighlight";
+import { CarPartAnimator } from "./CarPartAnimator";
 
 const PAINT_TRANSITION_SPEED = 6;
 
@@ -89,6 +90,7 @@ export function CarModel({
   return (
     <group ref={groupRef} position={transform.position} rotation={transform.rotation} scale={transform.scale}>
       <primitive object={prepared.root} />
+      <CarPartAnimator root={prepared.root} features={features} onFeatureIds={onFeatureIds} />
       <CarFeatureHighlight
         featureMaterials={prepared.featureMaterials}
         features={features}

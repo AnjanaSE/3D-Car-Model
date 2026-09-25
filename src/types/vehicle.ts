@@ -100,6 +100,20 @@ export interface VehicleFeatureToggle {
   offLabel: string;
   /** Glow added to the feature's own meshes while on. */
   emissive?: { color: string; intensity: number };
+  /** Parts that rotate while on, e.g. doors swinging open on their hinges. */
+  animate?: VehiclePartAnimation[];
+}
+
+/**
+ * Rotates a node of the GLB (matched by name, like `meshNames`) about its own
+ * pivot. Pivots come from the model, so a door must be exported with its origin
+ * on the hinge.
+ */
+export interface VehiclePartAnimation {
+  node: string;
+  axis: "x" | "y" | "z";
+  /** Radians when fully on (sign sets the direction). */
+  angle: number;
 }
 
 export interface VehicleFeature {
@@ -198,6 +212,12 @@ export interface VehicleOrbitLimits {
   /** Radians from the top (0 = straight down, π/2 = horizon). */
   minPolarAngle: number;
   maxPolarAngle: number;
+  /**
+   * Optional horizontal limits (radians, 0 = camera on +Z, π = camera on −Z).
+   * If min > max the allowed range wraps through ±π (e.g. looking forward from behind).
+   */
+  minAzimuthAngle?: number;
+  maxAzimuthAngle?: number;
 }
 
 export interface Vehicle3DConfig {
@@ -223,7 +243,7 @@ export interface VehicleImage {
 
 export interface VehicleCredit {
   text: string;
-  href: string;
+  href?: string;
 }
 
 export interface Vehicle {
