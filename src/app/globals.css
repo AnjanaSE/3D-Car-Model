@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas: #eeeeec;
-  --color-surface: #f7f7f5;
-  --color-ink: #121314;
-  --color-ink-soft: #4a4d52;
-  --color-ink-muted: #8a8d92;
-  --color-line: #d9d9d6;
-  --color-accent: #121314;
+  /* Dark showroom theme. Keep in sync with src/styles/_tokens.scss. */
+  --color-canvas: #060a13;
+  --color-surface: #0d1424;
+  --color-ink: #f2f5fa;
+  --color-ink-soft: #b3bdcc;
+  --color-ink-muted: #7d8799;
+  --color-line: rgba(255, 255, 255, 0.12);
+  --color-accent: #3b8bff;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -16,6 +17,7 @@
 }
 
 html {
+  color-scheme: dark;
   background: var(--color-canvas);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;

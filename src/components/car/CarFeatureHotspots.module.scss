@@ -1,0 +1,128 @@
+@use "../../styles/tokens" as *;
+
+// drei wraps each marker in a zero-size element positioned at the 3D point.
+.anchor {
+  pointer-events: none;
+}
+
+// The "+" circle sits exactly on the line end; the label extends away from the car.
+.hotspot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $ink;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-18px, -50%);
+  transition: opacity 250ms $ease;
+
+  &[data-side="left"] {
+    flex-direction: row-reverse;
+    transform: translate(calc(-100% + 18px), -50%);
+  }
+
+  &[data-hidden="true"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    .plus {
+      outline: 2px solid $ink;
+      outline-offset: 3px;
+    }
+  }
+}
+
+.plus {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(24, 76, 170, 0.9);
+  box-shadow: $glow;
+  transition: transform 250ms $ease, background-color 250ms $ease;
+
+  // The "+" itself.
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+    border-radius: 1px;
+    background: #fff;
+    transform: translate(-50%, -50%);
+    transition: transform 250ms $ease;
+  }
+
+  &::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .hotspot:hover & {
+    transform: scale(1.08);
+  }
+
+  .hotspot[aria-pressed="true"] & {
+    background: $accent;
+
+    // "+" turns into "×" while open.
+    &::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::after {
+      transform: translate(-50%, -50%) rotate(135deg);
+    }
+  }
+}
+
+.label {
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(10, 17, 32, 0.82);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(8px);
+
+  .hotspot[aria-pressed="true"] & {
+    border-color: rgba(59, 139, 255, 0.7);
+  }
+}
+
+// Small viewers: markers only; the name shows in the panel once opened.
+@container vehicle-viewer (max-width: 640px) {
+  .plus {
+    width: 32px;
+    height: 32px;
+  }
+
+  .label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot,
+  .plus,
+  .plus::before,
+  .plus::after {
+    transition: none;
+  }
+}

@@ -1,0 +1,257 @@
+@use "../../styles/tokens" as *;
+
+.root {
+  @include glass-panel;
+  position: relative;
+  width: 320px;
+  max-height: 100%;
+  padding: 26px 24px 22px;
+  overflow-y: auto;
+  border-radius: 14px;
+  color: $ink;
+  pointer-events: auto;
+  animation: panel-in 420ms $ease both;
+
+  @media (max-width: $mobile) {
+    width: 100%;
+    padding: 20px 18px 16px;
+    border-radius: 16px 16px 12px 12px;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: $ink-soft;
+  cursor: pointer;
+  transition: background-color 200ms $ease, color 200ms $ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: $ink;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ink;
+  }
+}
+
+.overline {
+  display: block;
+  color: #8fb8ff;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 10px 36px 0 0;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.description {
+  margin: 12px 0 0;
+  color: $ink-soft;
+  font-size: 14px;
+  line-height: 1.6;
+
+  @media (max-width: $mobile) {
+    font-size: 13px;
+  }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding: 10px 0;
+  border-top: 1px solid $line;
+  border-bottom: 1px solid $line;
+  color: $ink-soft;
+  font-size: 14px;
+}
+
+// On/off switch; the track shows the state label.
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 76px;
+  height: 32px;
+  padding: 0 10px 0 34px;
+  border: 1px solid $line;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: $ink-soft;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 250ms $ease, border-color 250ms $ease, padding 250ms $ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: $ink-soft;
+    transition: transform 250ms $ease, background-color 250ms $ease;
+  }
+
+  &[aria-checked="true"] {
+    padding: 0 34px 0 12px;
+    border-color: $accent;
+    background: $accent-soft;
+    color: $ink;
+
+    &::before {
+      background: $accent;
+      box-shadow: 0 0 10px rgba(59, 139, 255, 0.8);
+      transform: translateX(42px);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ink;
+    outline-offset: 2px;
+  }
+}
+
+.highlights {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+
+  li {
+    position: relative;
+    padding-left: 28px;
+    color: $ink-soft;
+    line-height: 1.4;
+
+    // Ringed check mark.
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid rgba(143, 184, 255, 0.8);
+      border-radius: 50%;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 5px;
+      left: 5.5px;
+      width: 7px;
+      height: 4px;
+      border-bottom: 1.5px solid #8fb8ff;
+      border-left: 1.5px solid #8fb8ff;
+      transform: rotate(-45deg);
+    }
+  }
+
+  @media (max-width: $mobile) {
+    display: none;
+  }
+}
+
+.specs {
+  margin: 14px 0 0;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid $line;
+    font-size: 14px;
+  }
+
+  dt {
+    color: $ink-soft;
+  }
+
+  dd {
+    margin: 0;
+    color: $ink;
+    text-align: right;
+  }
+}
+
+.explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  margin-top: 22px;
+  padding: 0 20px;
+  border: 1px solid rgba(59, 139, 255, 0.8);
+  border-radius: 999px;
+  background: rgba(24, 76, 170, 0.55);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(59, 139, 255, 0.25);
+  transition: background-color 250ms $ease, box-shadow 250ms $ease;
+
+  &:hover {
+    background: rgba(40, 104, 214, 0.75);
+    box-shadow: 0 0 24px rgba(59, 139, 255, 0.45);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ink;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: $mobile) {
+    margin-top: 16px;
+    height: 40px;
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@media (max-width: $mobile) {
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    animation: none;
+  }
+}

@@ -105,6 +105,10 @@ export interface VehicleFeatureToggle {
 export interface VehicleFeature {
   id: string;
   title: string;
+  /** Short label for the on-car hotspot, e.g. "Headlights". Defaults to `title`. */
+  shortTitle?: string;
+  /** Key points listed in the feature panel. */
+  highlights?: string[];
   /** Small overline, e.g. "Exterior". */
   category: string;
   description: string;
@@ -226,12 +230,16 @@ export interface Vehicle {
   id: string;
   name: string;
   subtitle: string;
+  /** Short descriptors shown under the name, e.g. ["Spider", "Performance", "Luxury"]. */
+  tags?: string[];
   /** Pre-formatted display price, e.g. "$65,000". */
   startingPrice: string;
   model: Vehicle3DConfig;
   colors: VehicleColor[];
   defaultColorId: string;
   specifications: VehicleSpecificationGroup[];
+  /** Specification groups offered in the showroom side navigation (by group id). */
+  navSpecGroupIds?: string[];
   features: VehicleFeature[];
   cameraPresets: VehicleCameraPreset[];
   defaultCameraPresetId: string;

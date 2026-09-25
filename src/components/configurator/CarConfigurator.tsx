@@ -8,7 +8,10 @@ import { scrollToVehicleDetails } from "@/lib/configurator/scroll";
 import { CarLoader } from "@/components/car/CarLoader";
 import { CameraControls } from "./CameraControls";
 import { ColorSelector } from "./ColorSelector";
-import { ViewModeSelector } from "./ViewModeSelector";
+import { SideNav, type SideNavItem } from "./SideNav";
+import { InfoPanel, type InfoPanelContent } from "./InfoPanel";
+import { useFullscreen } from "./useFullscreen";
+import styles from "./CarConfigurator.module.scss";
 import { VehicleDetails } from "./VehicleDetails";
 import { useVehicleInteraction, type VehicleInteractionState } from "./useVehicleInteraction";
 
@@ -50,6 +53,8 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
     immediate: true,
   }));
   const [viewModeId, setViewModeId] = useState<VehicleViewModeId>("exterior");
+  /** Specification category open in the side panel (from the side nav). */
+  const [specGroupId, setSpecGroupId] = useState<string | null>(null);
   const [state, actions] = useVehicleInteraction(vehicle.defaultColorId);
   const { clearFeature, selectFeature, toggleFeature, selectColour, markVehicleInteraction } = actions;
 
@@ -140,6 +145,7 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
     (featureId: string | null) => {
       const feature = featureId ? vehicle.features.find((f) => f.id === featureId) : undefined;
       if (!feature) return clearFeature();
+      setSpecGroupId(null);
       if (feature.toggle) toggleFeature(feature.id);
       else selectFeature(feature.id);
       focusFeature(feature.id);
@@ -147,18 +153,21 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
     [vehicle.features, clearFeature, toggleFeature, selectFeature, focusFeature],
   );
 
-  // Closing from the callout (×) or a background tap.
+  // Hotspot "+" buttons (open / close a feature) and background taps (null → close).
   const handleSelectFeature = useCallback(
     (featureId: string | null) => {
-      if (featureId === null) clearFeature();
-      else selectFeature(featureId);
+      if (featureId === null || featureId === state.selectedFeatureId) return clearFeature();
+      setSpecGroupId(null);
+      selectFeature(featureId);
+      focusFeature(featureId);
     },
-    [clearFeature, selectFeature],
+    [state.selectedFeatureId, clearFeature, selectFeature, focusFeature],
   );
 
   // Choosing from the dedicated feature menu: explicit, so bring its details into view.
   const handleMenuSelectFeature = useCallback(
     (featureId: string) => {
+      setSpecGroupId(null);
       selectFeature(featureId);
       focusFeature(featureId);
       scrollToVehicleDetails();
@@ -166,98 +175,164 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
     [selectFeature, focusFeature],
   );
 
-  // Escape closes the open feature.
+  // Double-click / double-tap on the car: step inside, or back out.
+  const handleDoubleTap = useCallback(() => {
+    setSpecGroupId(null);
+    selectViewMode(viewModeId === "interior" ? "exterior" : "interior");
+  }, [viewModeId, selectViewMode]);
+
+  /** Side nav: view modes switch the 3D view; spec categories open in the panel. */
+  const navItems = useMemo<SideNavItem[]>(
+    () => [
+      ...vehicle.viewModes.filter((m) => m.available).map((m) => ({ id: m.id, label: m.label })),
+      ...(vehicle.navSpecGroupIds ?? []).flatMap((id) => {
+        const group = vehicle.specifications.find((g) => g.id === id);
+        return group ? [{ id: group.id, label: group.title }] : [];
+      }),
+    ],
+    [vehicle.viewModes, vehicle.navSpecGroupIds, vehicle.specifications],
+  );
+
+  const handleNav = useCallback(
+    (id: string) => {
+      if (vehicle.viewModes.some((m) => m.id === id)) {
+        setSpecGroupId(null);
+        selectViewMode(id as VehicleViewModeId);
+        return;
+      }
+      // Choosing a specification category is a meaningful interaction.
+      clearFeature();
+      setSpecGroupId((current) => (current === id ? null : id));
+      markVehicleInteraction();
+    },
+    [vehicle.viewModes, selectViewMode, clearFeature, markVehicleInteraction],
+  );
+
+  const closePanel = useCallback(() => {
+    clearFeature();
+    setSpecGroupId(null);
+  }, [clearFeature]);
+
+  // Escape closes the open panel.
   useEffect(() => {
-    if (!state.selectedFeatureId) return;
+    if (!state.selectedFeatureId && !specGroupId) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") clearFeature();
+      if (event.key === "Escape") closePanel();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [state.selectedFeatureId, clearFeature]);
+  }, [state.selectedFeatureId, specGroupId, closePanel]);
+
+  const selectedFeature = vehicle.features.find((f) => f.id === state.selectedFeatureId);
+  const specGroup = vehicle.specifications.find((g) => g.id === specGroupId);
+  const panel: InfoPanelContent | null = selectedFeature
+    ? { kind: "feature", feature: selectedFeature, on: Boolean(state.featureOn[selectedFeature.id]) }
+    : specGroup
+      ? { kind: "specs", group: specGroup }
+      : null;
 
   const summary = state.hasInteracted ? selectionSummary(vehicle, state) : null;
+  const { stageRef, isFullscreen, toggleFullscreen } = useFullscreen<HTMLElement>();
 
   return (
     <>
-      {/* First screen: the car alone. min-height (not a fixed height) so the page can still scroll. */}
-      <section aria-label={`${vehicle.name} configurator`} className="flex min-h-[100svh] flex-col">
-        <div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 sm:px-8 lg:px-12">
-          <header className="flex items-end justify-between gap-4 pt-6 sm:pt-8">
-            <div className="min-w-0">
-              <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-ink-muted sm:text-[11px]">
-                {vehicle.subtitle}
-              </p>
-              <h1 className="mt-2 text-3xl font-light tracking-[-0.02em] text-ink sm:text-4xl lg:text-5xl">
-                {vehicle.name}
-              </h1>
-            </div>
-            <p className="hidden shrink-0 text-right text-sm text-ink-soft sm:block">
-              Starting from
-              <span className="block text-xl font-light tracking-tight text-ink lg:text-2xl">
-                {vehicle.startingPrice}
-              </span>
-            </p>
-          </header>
+      {/* The showroom: the car fills the first screen; UI floats over it. */}
+      <section ref={stageRef} aria-label={`${vehicle.name} configurator`} className={styles.stage}>
+        <div className={styles.viewer}>
+          <CarViewer
+            model={vehicle.model}
+            orbitLimits={orbitLimits}
+            viewMode={viewModeId}
+            paint={paint}
+            features={vehicle.features}
+            selectedFeatureId={state.selectedFeatureId}
+            onFeatureIds={onFeatureIds}
+            onSelectFeature={handleSelectFeature}
+            onFeatureTap={handleFeatureTap}
+            onDoubleTap={handleDoubleTap}
+            cameraMove={cameraMove}
+            fallbackImage={vehicle.fallbackImage}
+            onUserInteract={handleUserInteract}
+          />
+        </div>
 
-          {/* The viewer takes whatever height the header and controls leave. */}
-          <div className="@container/vehicle-viewer relative min-h-[300px] flex-1">
-            <div className="absolute inset-0">
-              <CarViewer
-                model={vehicle.model}
-                orbitLimits={orbitLimits}
-                viewMode={viewModeId}
-                paint={paint}
-                features={vehicle.features}
-                selectedFeatureId={state.selectedFeatureId}
-                onFeatureIds={onFeatureIds}
-                onSelectFeature={handleSelectFeature}
-                onFeatureTap={handleFeatureTap}
-                cameraMove={cameraMove}
-                fallbackImage={vehicle.fallbackImage}
-                onUserInteract={handleUserInteract}
-              />
-            </div>
-            <ViewModeSelector modes={vehicle.viewModes} activeId={viewModeId} onSelect={selectViewMode} />
+        <header className={styles.header}>
+          <div>
+            <h1 className={styles.name}>{vehicle.name}</h1>
+            <p className={styles.subtitle}>{vehicle.subtitle}</p>
+          </div>
+          <div className={styles.headerActions}>
+            <p className={styles.price}>
+              Starting from <strong>{vehicle.startingPrice}</strong>
+            </p>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={toggleFullscreen}
+              aria-label={isFullscreen ? "Exit full screen" : "Full screen"}
+              aria-pressed={isFullscreen}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path
+                  d={isFullscreen ? "M7 2v5H2M11 2v5h5M7 16v-5H2M11 16v-5h5" : "M2 7V2h5M16 7V2h-5M2 11v5h5M16 11v5h-5"}
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <div className={styles.nav}>
+          <SideNav items={navItems} activeId={specGroupId ?? viewModeId} onSelect={handleNav} />
+        </div>
+
+        {panel && (
+          <div className={styles.panel}>
+            <InfoPanel
+              content={panel}
+              onClose={closePanel}
+              onToggle={toggleFeature}
+              onExplore={() => scrollToVehicleDetails()}
+            />
+          </div>
+        )}
+
+        <div className={styles.bottom} data-panel-open={panel !== null}>
+          <div className={styles.identity}>
+            <p className={styles.identityName}>{vehicle.name}</p>
+            {vehicle.tags && <p className={styles.tags}>{vehicle.tags.join("  |  ")}</p>}
           </div>
 
-          <div className="border-t border-line pt-2 pb-3 sm:pb-4">
-            <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
-              <ColorSelector colors={vehicle.colors} selectedId={paint?.id ?? ""} onSelect={selectColour} />
-              <CameraControls
-                presets={viewPresets}
-                activePresetId={activePresetId}
-                onSelect={goToPreset}
-                onReset={resetView}
-              />
-            </div>
+          <div className={styles.hint}>
+            <RotateHint />
+            {summary ? (
+              <p className={styles.hintText}>
+                <span data-selection-summary>{summary}</span>
+                <button type="button" className={styles.detailsLink} onClick={() => scrollToVehicleDetails()}>
+                  View details ↓
+                </button>
+              </p>
+            ) : (
+              <p className={styles.hintText}>
+                {viewMode?.hint ?? "Drag to rotate"}
+                <span className={styles.hintSecondary}>
+                  {viewModeId === "interior" ? " · Double-click to step out" : " · Double-click to enter"}
+                </span>
+              </p>
+            )}
+          </div>
 
-            <div className="mt-2 flex min-h-11 items-center justify-center gap-4 text-xs tracking-wide text-ink-muted">
-              {summary ? (
-                <>
-                  <span aria-live="polite" data-selection-summary className="truncate text-ink-soft">
-                    {summary}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => scrollToVehicleDetails()}
-                    className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-ink transition-colors hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-ink"
-                  >
-                    View details
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                      <path d="M6 2v8M2.5 6.5 6 10l3.5-3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                </>
-              ) : viewMode?.hint ? (
-                <span>{viewMode.hint} · Tap a part to explore</span>
-              ) : (
-                <>
-                  <span className="pointer-coarse:hidden">Drag to rotate · Scroll to zoom · Click a part to explore</span>
-                  <span className="hidden pointer-coarse:inline">Drag to rotate · Pinch to zoom · Tap a part to explore</span>
-                </>
-              )}
-            </div>
+          <div className={styles.controls}>
+            <ColorSelector colors={vehicle.colors} selectedId={paint?.id ?? ""} onSelect={selectColour} />
+            <CameraControls
+              presets={viewPresets}
+              activePresetId={activePresetId}
+              onSelect={goToPreset}
+              onReset={resetView}
+            />
           </div>
         </div>
       </section>
@@ -285,5 +360,18 @@ export function CarConfigurator({ vehicle }: CarConfiguratorProps) {
         </footer>
       )}
     </>
+  );
+}
+
+/** "360°" ellipse with arrows under the car, as on a showroom turntable. */
+function RotateHint() {
+  return (
+    <svg className={styles.rotate} width="190" height="44" viewBox="0 0 190 44" fill="none" aria-hidden="true">
+      <path d="M58 32C26 29 6 24 6 18 6 10 46 4 95 4s89 6 89 14c0 6-20 11-52 14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M126 28l7 4-6 5M64 28l-7 4 6 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="95" y="38" textAnchor="middle" fill="currentColor" fontSize="18" fontWeight="500" letterSpacing="0.5">
+        360°
+      </text>
+    </svg>
   );
 }

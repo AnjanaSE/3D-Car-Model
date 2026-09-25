@@ -1,0 +1,107 @@
+@use "../../styles/tokens" as *;
+
+.root {
+  pointer-events: auto;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 1px solid $line;
+
+  @media (max-width: $mobile) {
+    flex-direction: row;
+    gap: 6px;
+    padding: 0 16px;
+    border-left: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 210px;
+  height: 48px;
+  padding: 0 18px;
+  border: 0;
+  background: transparent;
+  color: $ink-soft;
+  font: inherit;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 250ms $ease,
+    background-color 250ms $ease;
+
+  // Active bar on the left edge.
+  &::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: -1px;
+    width: 2px;
+    background: $accent;
+    box-shadow: 0 0 10px rgba(59, 139, 255, 0.8);
+    transform: scaleY(0);
+    transition: transform 300ms $ease;
+  }
+
+  &:hover {
+    color: $ink;
+  }
+
+  &[aria-current="true"] {
+    background: linear-gradient(90deg, rgba(59, 139, 255, 0.22), rgba(59, 139, 255, 0));
+    color: $ink;
+
+    &::before {
+      transform: scaleY(1);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ink;
+    outline-offset: -2px;
+  }
+
+  @media (max-width: $mobile) {
+    width: auto;
+    flex-shrink: 0;
+    gap: 8px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid $line;
+    border-radius: 999px;
+    background: rgba(10, 17, 32, 0.7);
+    font-size: 13px;
+
+    &::before {
+      display: none;
+    }
+
+    &[aria-current="true"] {
+      border-color: $accent;
+      background: $accent-soft;
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, type ReactNode, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type ReactNode, type RefObject } from "react";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import { Bvh } from "@react-three/drei";
 import type { Intersection } from "three";
@@ -15,6 +15,9 @@ const DRAG_THRESHOLD = 5;
  * win, without selecting parts on the far side of the car.
  */
 const DEPTH_TOLERANCE = 0.25;
+/** Two taps within this time (ms) and distance (px) make a double-tap. */
+const DOUBLE_TAP_MS = 320;
+const DOUBLE_TAP_PX = 24;
 
 function featureIdOf(hit: Intersection): string | null {
   const id: unknown = hit.object.userData[FEATURE_ID_KEY];
@@ -35,6 +38,8 @@ function resolveHit(intersections: Intersection[]): { featureId: string | null; 
 interface CarFeatureInteractionProps {
   children: ReactNode;
   onSelect: (featureId: string | null) => void;
+  /** Double-click / double-tap anywhere on the car. */
+  onDoubleTap?: () => void;
   /** Written (not React state) so hover never re-renders; read by the highlight. */
   hoveredFeatureRef: RefObject<string | null>;
   debug?: boolean;
@@ -50,10 +55,12 @@ interface CarFeatureInteractionProps {
 export function CarFeatureInteraction({
   children,
   onSelect,
+  onDoubleTap,
   hoveredFeatureRef,
   debug = false,
 }: CarFeatureInteractionProps) {
   const get = useThree((state) => state.get);
+  const lastTap = useRef({ time: -Infinity, x: 0, y: 0 });
 
   const setHovered = useCallback(
     (featureId: string | null) => {
@@ -75,12 +82,24 @@ export function CarFeatureInteraction({
       event.stopPropagation();
       if (event.delta > DRAG_THRESHOLD) return;
 
+      // Detected here rather than via `dblclick`, which mobile browsers don't fire reliably.
+      const { timeStamp, clientX, clientY } = event.nativeEvent;
+      const previous = lastTap.current;
+      const isDouble =
+        timeStamp - previous.time < DOUBLE_TAP_MS &&
+        Math.hypot(clientX - previous.x, clientY - previous.y) < DOUBLE_TAP_PX;
+      lastTap.current = isDouble ? { time: -Infinity, x: 0, y: 0 } : { time: timeStamp, x: clientX, y: clientY };
+      if (isDouble && onDoubleTap) {
+        onDoubleTap();
+        return;
+      }
+
       const { featureId, hit } = resolveHit(event.intersections);
       if (debug) logDebugHit(event.intersections, featureId ? hit : null);
       // Tapping bodywork that isn't a feature dismisses the current selection.
       onSelect(featureId);
     },
-    [onSelect, debug],
+    [onSelect, onDoubleTap, debug],
   );
 
   const handlePointerMove = useCallback(

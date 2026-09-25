@@ -32,6 +32,7 @@ export interface CarViewerProps {
   onSelectFeature: (featureId: string | null) => void;
   /** A tap/click on a part of the car (or on bodywork that isn't a feature → null). */
   onFeatureTap: (featureId: string | null) => void;
+  onDoubleTap?: () => void;
   cameraMove: CameraMove | null;
   fallbackImage?: VehicleImage;
   onUserInteract?: () => void;
@@ -52,6 +53,7 @@ export default function CarViewer({
   onFeatureIds,
   onSelectFeature,
   onFeatureTap,
+  onDoubleTap,
   cameraMove,
   fallbackImage,
   onUserInteract,
@@ -106,6 +108,7 @@ export default function CarViewer({
             onFeatureIds={onFeatureIds}
             onSelectFeature={onSelectFeature}
             onFeatureTap={onFeatureTap}
+            onDoubleTap={onDoubleTap}
             debug={debug}
             cameraMove={cameraMove}
             vehicleBounds={vehicleBounds}

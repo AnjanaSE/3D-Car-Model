@@ -1,0 +1,25 @@
+// Shared palette for the SCSS modules (dark showroom theme).
+// Keep in sync with the Tailwind theme tokens in app/globals.css.
+
+$bg: #060a13;
+$surface: #0d1424;
+$panel: rgba(11, 18, 33, 0.82);
+$ink: #f2f5fa;
+$ink-soft: #b3bdcc;
+$ink-muted: #7d8799;
+$line: rgba(255, 255, 255, 0.12);
+$accent: #3b8bff;
+$accent-soft: rgba(59, 139, 255, 0.18);
+$glow: 0 0 0 1px rgba(59, 139, 255, 0.55), 0 0 18px rgba(59, 139, 255, 0.45);
+
+$ease: cubic-bezier(0.22, 1, 0.36, 1);
+$mobile: 639px;
+$tablet: 1023px;
+
+// Frosted dark panel used by the overlays on the 3D stage.
+@mixin glass-panel {
+  border: 1px solid $line;
+  background: $panel;
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(14px) saturate(1.2);
+}

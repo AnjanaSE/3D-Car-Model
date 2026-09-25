@@ -85,6 +85,9 @@ function resolveFeature(matchers: CompiledFeatureMatcher[], meshName: string): s
   return matchers.find((matcher) => matcher.meshes.some((re) => re.test(mesh)))?.featureId ?? null;
 }
 
+/** Name of the prepared model's root object, for finding the car in the scene. */
+export const VEHICLE_ROOT_NAME = "vehicle-root";
+
 /** Key under which a clickable mesh stores its feature id in `userData`. */
 export const FEATURE_ID_KEY = "vehicleFeatureId";
 
@@ -124,6 +127,7 @@ export function prepareVehicleModel(
   features: Pick<VehicleFeature, "id" | "meshNames">[] = [],
 ): PreparedVehicleModel {
   const root = scene.clone(true);
+  root.name = VEHICLE_ROOT_NAME;
   const matchers = compileMapping(config.meshMapping);
   const featureMatchers = compileFeatures(features);
   const cache = new Map<string, Material>();

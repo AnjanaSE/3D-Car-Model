@@ -13,16 +13,16 @@ const BASE =
 
 const VARIANTS: Record<Variant, { idle: string; active: string }> = {
   segment: {
-    idle: "h-11 px-4 text-ink-soft hover:bg-ink/5 hover:text-ink",
-    active: "h-11 px-4 bg-ink text-white",
+    idle: "h-10 px-3.5 text-ink-soft hover:bg-white/10 hover:text-ink",
+    active: "h-10 px-3.5 bg-accent/25 text-ink shadow-[inset_0_0_0_1px_var(--color-accent)]",
   },
   quiet: {
-    idle: "h-11 px-4 text-ink-soft hover:text-ink",
-    active: "h-11 px-4 text-ink",
+    idle: "h-10 px-3.5 text-ink-soft hover:text-ink",
+    active: "h-10 px-3.5 text-ink",
   },
   primary: {
-    idle: "h-12 px-7 bg-ink text-white hover:bg-ink/85",
-    active: "h-12 px-7 bg-ink text-white",
+    idle: "h-12 px-7 bg-accent text-white hover:bg-accent/85",
+    active: "h-12 px-7 bg-accent text-white",
   },
   secondary: {
     idle: "h-12 px-7 border border-ink/20 text-ink hover:border-ink",

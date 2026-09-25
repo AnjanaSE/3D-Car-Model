@@ -1,7 +1,4 @@
-$ink: #121314;
-$ink-muted: #8a8d92;
-$ease: cubic-bezier(0.22, 1, 0.36, 1);
-$mobile: 639px;
+@use "../../styles/tokens" as *;
 
 .root {
   padding-top: 48px;
@@ -40,7 +37,7 @@ $mobile: 639px;
   flex-shrink: 0;
   height: 44px;
   padding: 0 18px;
-  border: 1px solid rgba($ink, 0.16);
+  border: 1px solid $line;
   border-radius: 999px;
   background: transparent;
   color: $ink;
@@ -60,9 +57,9 @@ $mobile: 639px;
   }
 
   &[aria-pressed="true"] {
-    border-color: $ink;
-    background: $ink;
-    color: #fff;
+    border-color: $accent;
+    background: $accent-soft;
+    color: $ink;
   }
 
   &:focus-visible {

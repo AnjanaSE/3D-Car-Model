@@ -15,7 +15,8 @@ import { CarModel } from "./CarModel";
 import { CarCameraController } from "./CarCameraController";
 import { CarFeatureInteraction } from "./CarFeatureInteraction";
 import { CarFeatureHitAreas } from "./CarFeatureHitAreas";
-import { CarFeatureCallout } from "./CarFeatureCallout";
+import { CarFeatureHotspots } from "./CarFeatureHotspots";
+import { CarStageFloor } from "./CarStageFloor";
 
 interface CarSceneProps {
   model: Vehicle3DConfig;
@@ -30,6 +31,8 @@ interface CarSceneProps {
   onSelectFeature: (featureId: string | null) => void;
   /** Taps on the car; separate from `onSelectFeature` so taps can also toggle. */
   onFeatureTap: (featureId: string | null) => void;
+  /** Double-click / double-tap on the car (enters or leaves the interior). */
+  onDoubleTap?: () => void;
   debug?: boolean;
   cameraMove: CameraMove | null;
   vehicleBounds: Box3 | null;
@@ -45,7 +48,8 @@ interface CarSceneProps {
 function StudioEnvironment() {
   return (
     <Environment resolution={256} frames={1}>
-      <color attach="background" args={["#2c2c2e"]} />
+      {/* Cool, dark studio so reflections match the showroom backdrop. */}
+      <color attach="background" args={["#1a2233"]} />
       {/* Overhead softbox */}
       <Lightformer form="rect" intensity={2.4} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[10, 4, 1]} />
       {/* Long side strips for the shoulder-line highlight */}
@@ -70,6 +74,7 @@ export function CarScene({
   onFeatureIds,
   onSelectFeature,
   onFeatureTap,
+  onDoubleTap,
   debug = false,
   cameraMove,
   vehicleBounds,
@@ -78,8 +83,8 @@ export function CarScene({
 }: CarSceneProps) {
   const orbit = orbitLimits ?? model.orbit;
   const hoveredFeatureRef = useRef<string | null>(null);
-  const selectedFeature = features.find((feature) => feature.id === selectedFeatureId) ?? null;
-  const hitAreaFeatures = useMemo(
+  // Only the current view's features get hit areas and hotspots.
+  const viewFeatures = useMemo(
     () => features.filter((feature) => (feature.viewMode ?? "exterior") === viewMode),
     [features, viewMode],
   );
@@ -94,6 +99,7 @@ export function CarScene({
       <Suspense fallback={null}>
         <CarFeatureInteraction
           onSelect={onFeatureTap}
+          onDoubleTap={onDoubleTap}
           hoveredFeatureRef={hoveredFeatureRef}
           debug={debug}
         >
@@ -106,15 +112,14 @@ export function CarScene({
             hoveredFeatureRef={hoveredFeatureRef}
             onReady={onReady}
           />
-          <CarFeatureHitAreas features={hitAreaFeatures} debug={debug} />
+          <CarFeatureHitAreas features={viewFeatures} debug={debug} />
         </CarFeatureInteraction>
-        {selectedFeature && (
-          <CarFeatureCallout
-            key={selectedFeature.id}
-            feature={selectedFeature}
-            onClose={() => onSelectFeature(null)}
-          />
-        )}
+        <CarFeatureHotspots
+          features={viewFeatures}
+          selectedFeatureId={selectedFeatureId}
+          onSelect={onSelectFeature}
+        />
+        <CarStageFloor />
         {/*
           Rendered once after the model mounts; the car is static so it never needs updating.
           Must sit slightly *below* y = 0: Drei renders its blur plane at the world origin through
@@ -125,10 +130,10 @@ export function CarScene({
           scale={12}
           far={2.5}
           blur={2.4}
-          opacity={0.62}
+          opacity={0.8}
           resolution={512}
           frames={1}
-          color="#16181b"
+          color="#000000"
         />
       </Suspense>
 

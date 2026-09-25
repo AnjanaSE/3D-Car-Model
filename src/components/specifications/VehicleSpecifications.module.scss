@@ -1,9 +1,4 @@
-$ink: #121314;
-$ink-soft: #4a4d52;
-$ink-muted: #8a8d92;
-$line: #d9d9d6;
-$ease: cubic-bezier(0.22, 1, 0.36, 1);
-$mobile: 639px;
+@use "../../styles/tokens" as *;
 
 .root {
   padding-top: 56px;

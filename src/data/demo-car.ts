@@ -11,6 +11,7 @@ export const demoVehicle: Vehicle = {
   id: "demo-car",
   name: "Demo Performance GT",
   subtitle: "Mid-engine Performance Spider",
+  tags: ["Spider", "Performance", "Luxury"],
   startingPrice: "$65,000",
 
   model: {
@@ -70,13 +71,17 @@ export const demoVehicle: Vehicle = {
   },
 
   colors: [
+    { id: "grey", name: "Mineral Grey", hex: "#4a5260", finish: "metallic" },
     { id: "white", name: "Pearl White", hex: "#e9e8e4", finish: "pearl" },
     { id: "black", name: "Midnight Black", hex: "#0c0c0d", finish: "metallic" },
     { id: "silver", name: "Metallic Silver", hex: "#a7abb0", finish: "metallic" },
     { id: "red", name: "Performance Red", hex: "#8e0d12", finish: "solid", price: "+$1,200" },
     { id: "blue", name: "Ocean Blue", hex: "#12325a", finish: "metallic", price: "+$1,200" },
   ],
-  defaultColorId: "red",
+  defaultColorId: "grey",
+
+  // Shown in the showroom side navigation, below Exterior / Interior.
+  navSpecGroupIds: ["performance", "technology", "safety"],
 
   specifications: [
     {
@@ -175,6 +180,8 @@ export const demoVehicle: Vehicle = {
   features: [
     {
       id: "headlights",
+      shortTitle: "Headlights",
+      highlights: ["Matrix LED technology", "Adaptive light control", "Automatic on/off"],
       title: "Adaptive LED Headlights",
       category: "Exterior",
       description:
@@ -195,16 +202,20 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "grille",
+      shortTitle: "Front Intakes",
+      highlights: ["Active cooling shutters", "Lower aerodynamic drag", "Dedicated brake cooling"],
       title: "Active Front Intakes",
       category: "Exterior",
       description:
         "Shutters in the front intakes open only when the brakes and radiators need cooling, then close to cut drag.",
       hitAreas: [{ type: "box", position: [0, 0.36, 2.15], size: [1.3, 0.3, 0.3] }],
       camera: { position: [-1.4, 0.95, 5.2], target: [0, 0.45, 1.6] },
-      callout: { anchor: [0, 0.34, 2.22], elbow: [-0.45, 0.95, 2.6], label: [-1.0, 0.95, 2.6] },
+      callout: { anchor: [0, 0.34, 2.22], elbow: [0.3, 0.3, 2.75], label: [0.6, 0.3, 3.05] },
     },
     {
       id: "wheels",
+      shortTitle: "Wheel",
+      highlights: ["20\" forged alloy", "Carbon-ceramic brakes", "Performance tyres"],
       title: "20\" Forged Alloy Wheels",
       category: "Exterior",
       description:
@@ -215,6 +226,8 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "mirrors",
+      shortTitle: "Side Mirror",
+      highlights: ["Power folding", "Heated and auto-dimming", "Integrated 360° cameras"],
       title: "Power-Folding Mirrors",
       category: "Technology",
       description:
@@ -228,6 +241,8 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "doors",
+      shortTitle: "Door",
+      highlights: ["Aluminium construction", "Soft-close latches", "Frameless glass"],
       title: "Lightweight Aluminium Doors",
       category: "Design",
       description:
@@ -241,6 +256,8 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "rear-lights",
+      shortTitle: "Rear Light",
+      highlights: ["Round LED signature", "Instant-on brake lights", "Dynamic indicators"],
       title: "Signature LED Tail Lights",
       category: "Exterior",
       description:
@@ -255,6 +272,8 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "hardtop",
+      shortTitle: "Roof",
+      highlights: ["Opens in 14 seconds", "Two-piece aluminium", "Stows behind the seats"],
       title: "Retractable Hardtop",
       category: "Design",
       description:
@@ -265,6 +284,8 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "steering-wheel",
+      shortTitle: "Steering Wheel",
+      highlights: ["Carbon-fibre rim", "LED shift lights", "Drive-mode switch"],
       title: "Carbon Steering Wheel",
       category: "Interior",
       description:
@@ -276,6 +297,8 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "seats",
+      shortTitle: "Seats",
+      highlights: ["Full-grain leather", "Electric adjustment", "Contrast stitching"],
       title: "Full-Grain Leather Sport Seats",
       category: "Interior",
       description:
@@ -288,6 +311,8 @@ export const demoVehicle: Vehicle = {
     },
     {
       id: "driver-display",
+      shortTitle: "Driver Display",
+      highlights: ["Configurable layouts", "Navigation in view", "Performance telemetry"],
       title: "Digital Driver Display",
       category: "Interior",
       description:
