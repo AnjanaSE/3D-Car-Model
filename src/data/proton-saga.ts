@@ -18,6 +18,7 @@ export const protonSaga: Vehicle = {
   name: "Proton Saga",
   subtitle: "All-New Saga · i-GT 1.5 Sedan",
   tags: ["Sedan", "i-GT 1.5", "Premium"],
+  brandLogo: { src: "/brands/proton-logo.png", alt: "PROTON", width: 259, height: 52 },
   startingPrice: "RM38,990",
 
   model: {

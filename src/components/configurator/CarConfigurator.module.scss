@@ -88,6 +88,18 @@
   }
 }
 
+.brandLogo {
+  display: block;
+  width: auto;
+  height: 30px;
+  margin-bottom: 14px;
+
+  @media (max-width: $mobile) {
+    height: 20px;
+    margin-bottom: 8px;
+  }
+}
+
 .name {
   margin: 0;
   color: $ink;
@@ -187,6 +199,11 @@
 
   @media (max-width: $mobile) {
     top: 136px;
+
+    // Below the taller header when a brand logo is shown.
+    .stage[data-has-logo="true"] & {
+      top: 164px;
+    }
     right: 0;
     left: 0;
     transform: none;

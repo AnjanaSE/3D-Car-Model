@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import type { CameraView, Vehicle, VehicleViewModeId } from "@/types/vehicle";
 import { getCameraPreset, type CameraMove } from "@/lib/three/camera";
 import { scrollToVehicleDetails } from "@/lib/configurator/scroll";
@@ -239,7 +240,10 @@ export function CarConfigurator({ vehicle, vehicleSwitcher }: CarConfiguratorPro
   return (
     <>
       {/* The showroom: the car fills the first screen; UI floats over it. */}
-      <section ref={stageRef} aria-label={`${vehicle.name} configurator`} className={styles.stage}>
+      <section ref={stageRef} aria-label={`${vehicle.name} configurator`}
+        className={styles.stage}
+        data-has-logo={Boolean(vehicle.brandLogo)}
+      >
         <div className={styles.viewer}>
           <CarViewer
             model={vehicle.model}
@@ -260,6 +264,16 @@ export function CarConfigurator({ vehicle, vehicleSwitcher }: CarConfiguratorPro
 
         <header className={styles.header}>
           <div>
+            {vehicle.brandLogo && (
+              <Image
+                className={styles.brandLogo}
+                src={vehicle.brandLogo.src}
+                alt={vehicle.brandLogo.alt}
+                width={vehicle.brandLogo.width}
+                height={vehicle.brandLogo.height}
+                priority
+              />
+            )}
             <h1 className={styles.name}>{vehicle.name}</h1>
             <p className={styles.subtitle}>{vehicle.subtitle}</p>
           </div>

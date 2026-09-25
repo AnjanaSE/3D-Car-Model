@@ -250,6 +250,8 @@ export interface Vehicle {
   id: string;
   name: string;
   subtitle: string;
+  /** Brand logo shown above the name in the showroom header (transparent image for a dark background). */
+  brandLogo?: VehicleImage;
   /** Short descriptors shown under the name, e.g. ["Spider", "Performance", "Luxury"]. */
   tags?: string[];
   /** Pre-formatted display price, e.g. "$65,000". */
