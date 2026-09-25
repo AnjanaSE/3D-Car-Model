@@ -34,8 +34,14 @@ function getDistanceScale(aspect: number): number {
   return MathUtils.clamp(REFERENCE_ASPECT / aspect, 1, MAX_DISTANCE_SCALE);
 }
 
+/** The camera must stay inside the round showroom (radius 18 m, see CarShowroom). */
+const ABSOLUTE_MAX_DISTANCE = 15;
+
 export function getOrbitDistanceRange(limits: VehicleOrbitLimits, aspect: number) {
-  return { min: limits.minDistance, max: limits.maxDistance * getDistanceScale(aspect) };
+  return {
+    min: limits.minDistance,
+    max: Math.min(limits.maxDistance * getDistanceScale(aspect), ABSOLUTE_MAX_DISTANCE),
+  };
 }
 
 /** Fraction of the viewport the vehicle may fill when fitted. */

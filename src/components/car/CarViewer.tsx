@@ -93,7 +93,7 @@ export default function CarViewer({
           frameloop="demand"
           dpr={[1, 2]}
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-          camera={{ fov: model.orbit.fov, near: 0.1, far: 100, position: initialPosition }}
+          camera={{ fov: model.orbit.fov, near: 0.1, far: 400, position: initialPosition }}
           aria-label="Interactive 3D vehicle. Drag to rotate, scroll or pinch to zoom, tap a part to learn about it."
           // Tapping empty space closes the selected feature (R3F ignores drags here).
           onPointerMissed={() => onSelectFeature(null)}

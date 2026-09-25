@@ -17,6 +17,7 @@ import { CarFeatureInteraction } from "./CarFeatureInteraction";
 import { CarFeatureHitAreas } from "./CarFeatureHitAreas";
 import { CarFeatureHotspots } from "./CarFeatureHotspots";
 import { CarStageFloor } from "./CarStageFloor";
+import { CarShowroom } from "./CarShowroom";
 
 interface CarSceneProps {
   model: Vehicle3DConfig;
@@ -48,8 +49,8 @@ interface CarSceneProps {
 function StudioEnvironment() {
   return (
     <Environment resolution={256} frames={1}>
-      {/* Cool, dark studio so reflections match the showroom backdrop. */}
-      <color attach="background" args={["#1a2233"]} />
+      {/* Mid-grey studio: bright enough that dark paints still show their shape. */}
+      <color attach="background" args={["#6b7688"]} />
       {/* Overhead softbox */}
       <Lightformer form="rect" intensity={2.4} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[10, 4, 1]} />
       {/* Long side strips for the shoulder-line highlight */}
@@ -91,10 +92,14 @@ export function CarScene({
 
   return (
     <>
-      <ambientLight intensity={0.25} />
-      <directionalLight position={[4, 8, 5]} intensity={1.1} />
+      <ambientLight intensity={0.35} />
+      <directionalLight position={[4, 8, 5]} intensity={1.4} />
       <directionalLight position={[-5, 4, -4]} intensity={0.35} />
       <StudioEnvironment />
+      {/* Own boundary: the car never waits for the view photo. */}
+      <Suspense fallback={null}>
+        <CarShowroom />
+      </Suspense>
 
       <Suspense fallback={null}>
         <CarFeatureInteraction

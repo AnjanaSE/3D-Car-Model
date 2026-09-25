@@ -94,3 +94,10 @@ coordinates into `hitAreas` / `callout`.
 
 The demo model is by vicent091036 on Sketchfab, as distributed with the three.js examples. It is a
 stand-in: confirm its licence, or replace it with a licensed asset, before any production use.
+
+## Showroom backdrop credit
+
+The showroom is 3D (`src/components/car/CarShowroom.tsx`): a round glass wall centred on the turntable, so it
+follows the stage's curve, with a city panorama outside. The view is "Signal Hill Dawn" by Greg Zaal, from
+[Poly Haven](https://polyhaven.com/a/signal_hill_dawn) (CC0 – public domain), cropped and graded to evening in
+`public/textures/showroom/city-view.webp`. To use a different view, replace that file.
